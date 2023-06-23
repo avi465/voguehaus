@@ -1,37 +1,56 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const { store } = require('../middlewares/sessionMiddleware');
 const User = require('../models/User');
-const Session = require('../models/Session');
 
-// Register a new user
 exports.register = async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
 
-        // Check if the email or phone number already exists
-        const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email or phone number already exists' });
+        // Check if the email already exists
+        if (email) {
+            const existingEmailUser = await User.findOne({ email });
+            if (existingEmailUser) {
+                return res.status(400).json({ error: 'Email already exists' });
+            }
+
+            // Check if the password is provided
+            if (!password) {
+                return res.status(400).json({ error: 'Password is required' });
+            }
+
+            // Hash the password
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Create a new user
+            const newUser = new User({
+                name,
+                email,
+                password: hashedPassword,
+            });
+            await newUser.save();
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Check if the phone number already exists
+        if (phone) {
+            const existingPhoneUser = await User.findOne({ phone });
+            if (existingPhoneUser) {
+                return res.status(400).json({ error: 'Phone number already exists' });
+            }
+            // Use Twilio Verify to send a verification code to the user's phone number
+            twilio.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+                .verifications
+                .create({ to: phone, channel: 'sms' })
+                .then(verification => console.log(verification.status));
 
-        // Use Twilio Verify to send a verification code to the user's phone number
-        twilio.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
-            .verifications
-            .create({ to: phone, channel: 'sms' })
-            .then(verification => console.log(verification.status));
-
-        // Create a new user
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword,
-            phone
-        });
-        await newUser.save();
+            // Create a new user
+            const newUser = new User({
+                name,
+                phone,
+            });
+            await newUser.save();
+        }
 
         res.json({ message: 'User registered successfully' });
     } catch (error) {
@@ -101,185 +120,3 @@ exports.logout = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-
-
-// const bcrypt = require('bcrypt');
-// const User = require('../models/User');
-// const Session = require('../models/Session');
-// const { roles } = require('../constants');
-// const { sendOTP, verifyOTP } = require('../helpers/twilioHelper');
-// // const twilio = require('twilio');
-
-// // const accountSid = 'your_account_sid';
-// // const authToken = 'your_auth_token';
-// // const client = twilio(accountSid, authToken);
-
-// // Register user with phone number and send OTP
-// async function registerWithPhone(req, res, next) {
-//     try {
-//         const { phoneNumber } = req.body;
-
-//         // Generate OTP
-//         const otp = Math.floor(100000 + Math.random() * 900000);
-
-//         // Send OTP to user's phone number
-//         await sendOTP(phoneNumber, otp);
-
-//         // Save OTP and phone number in session
-//         req.session.otp = otp;
-//         req.session.phoneNumber = phoneNumber;
-
-//         res.json({ message: 'OTP sent successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// // Verify OTP and create user account
-// async function verifyOTPAndCreateAccount(req, res, next) {
-//     try {
-//         const { otp, name, role } = req.body;
-//         const { otp: savedOTP, phoneNumber } = req.session;
-
-//         if (!savedOTP || !phoneNumber) {
-//             throw new Error('OTP verification failed');
-//         }
-
-//         // Verify OTP
-//         const isOTPVerified = await verifyOTP(phoneNumber, otp);
-
-//         if (!isOTPVerified) {
-//             throw new Error('Invalid OTP');
-//         }
-
-//         // Check if user already exists
-//         const existingUser = await User.findOne({ phoneNumber });
-//         if (existingUser) {
-//             throw new Error('User already exists');
-//         }
-
-//         // Create user account
-//         const hashedPassword = await bcrypt.hash(otp.toString(), 10);
-//         const user = new User({ phoneNumber, name, role, password: hashedPassword });
-//         await user.save();
-
-//         // Create a new session record
-//         const session = new Session({ userId: user._id });
-//         await session.save();
-
-//         res.json({ message: 'User account created successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// // Login with phone number and send OTP
-// async function loginWithPhone(req, res, next) {
-//     try {
-//         const { phoneNumber } = req.body;
-
-//         // Generate OTP
-//         const otp = Math.floor(100000 + Math.random() * 900000);
-
-//         // Send OTP to user's phone number
-//         await sendOTP(phoneNumber, otp);
-
-//         // Save OTP and phone number in session
-//         req.session.otp = otp;
-//         req.session.phoneNumber = phoneNumber;
-
-//         res.json({ message: 'OTP sent successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// // Verify OTP and generate access token
-// async function verifyOTPAndGenerateToken(req, res, next) {
-//     try {
-//         const { otp } = req.body;
-//         const { otp: savedOTP, phoneNumber } = req.session;
-
-//         if (!savedOTP || !phoneNumber) {
-//             throw new Error('OTP verification failed');
-//         }
-
-//         // Verify OTP
-//         const isOTPVerified = await verifyOTP(phoneNumber, otp);
-
-//         if (!isOTPVerified) {
-//             throw new Error('Invalid OTP');
-//         }
-
-//         // Check if user exists
-//         const user = await User.findOne({ phoneNumber });
-
-//         if (!user) {
-//             throw new Error('User not found');
-//         }
-
-//         // Create a new session record
-//         const session = new Session({ userId: user._id });
-//         await session.save();
-
-//         res.json({ message: 'OTP verified successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// // Login with email and password
-// async function loginWithEmail(req, res, next) {
-//     try {
-//         const { email, password } = req.body;
-
-//         // Check if user exists
-//         const user = await User.findOne({ email });
-
-//         if (!user) {
-//             throw new Error('Invalid email or password');
-//         }
-
-//         // Compare passwords
-//         const isPasswordValid = await bcrypt.compare(password, user.password);
-
-//         if (!isPasswordValid) {
-//             throw new Error('Invalid email or password');
-//         }
-
-//         // Create a new session record
-//         const session = new Session({ userId: user._id });
-//         await session.save();
-
-//         res.json({ message: 'Logged in successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// // Logout user
-// async function logout(req, res, next) {
-//     try {
-//         const { sessionId } = req.session;
-
-//         if (!sessionId) {
-//             throw new Error('User not logged in');
-//         }
-
-//         // Clear session data
-//         req.session.destroy();
-
-//         res.json({ message: 'Logged out successfully' });
-//     } catch (error) {
-//         next(error);
-//     }
-// }
-
-// module.exports = {
-//     registerWithPhone,
-//     verifyOTPAndCreateAccount,
-//     loginWithPhone,
-//     verifyOTPAndGenerateToken,
-//     loginWithEmail,
-//     logout,
-// };

@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
         postalCode: String,
         country: String,
     },
-    phone: String,
+    phone: { type: String },
     role: { type: String, enum: ['user', 'vendor', 'admin'], default: 'user' },
     cart: [
         {
@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema({
             status: String,
         },
     ],
-    sessions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Session' }],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

@@ -1,24 +1,25 @@
 const bcrypt = require('bcrypt');
+const { store } = require('../middlewares/sessionMiddleware');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
 const Vendor = require('../models/Vendor');
 const Order = require('../models/Order');
 // ...
 
-const loginAdmin = async (req, res) => {
+const adminLogin = async (req, res) => {
     const { email, password, rememberMe } = req.body;
 
     try {
         // Find the user by email
-        const user = await Admin.findOne({ email });
+        const adminUser = await Admin.findOne({ email });
 
         // Check if the user exists
-        if (!user) {
+        if (!adminUser) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
         // Validate the password
-        const isValidPassword = bcrypt.compareSync(password, user.password);
+        const isValidPassword = bcrypt.compareSync(password, adminUser.password);
         if (!isValidPassword) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
@@ -26,7 +27,7 @@ const loginAdmin = async (req, res) => {
         // Log in the user
 
         // Set the user ID in the session
-        req.session.userId = user._id;
+        req.session.adminId = adminUser._id;
 
         // Set the session expiration if rememberMe is true
         if (rememberMe) {
@@ -35,6 +36,30 @@ const loginAdmin = async (req, res) => {
 
         // Send a success response
         res.status(200).json({ message: 'Login successful' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const adminLogout = (req, res) => {
+    try {
+        // Clear the session data
+        req.session.destroy();
+
+        // Remove the session from the session store
+        store.destroy(req.sessionID, (error) => {
+            if (error) {
+                console.log(error);
+                return res.status(500).json({ error: 'Error while destroying session' });
+            }
+
+            // Clear the session cookie
+            res.clearCookie('sessionId');
+
+            // Respond with a success message or redirect to the desired page
+            res.status(200).json({ message: 'Logout successful' });
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -83,7 +108,65 @@ const manageOrders = async (req, res) => {
     }
 }
 
-// Other admin-specific controller methods
-// ...
+const manageVendors = async (req, res) => {
+    try {
+        // Fetch all vendors from the database
+        const vendors = await Vendor.find();
 
-module.exports = { loginAdmin, dashboardHome, manageUsers, manageOrders };
+        // Return the vendors as the API response
+        res.json({ vendors });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const manageCategories = async (req, res) => {
+    try {
+        // Fetch all categories from the database
+        const categories = await Category.find();
+
+        // Return the categories as the API response
+        res.json({ categories });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const manageBrands = async (req, res) => {
+    try {
+        // Fetch all brands from the database
+        const brands = await Brand.find();
+
+        // Return the brands as the API response
+        res.json({ brands });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const manageCoupons = async (req, res) => {
+    try {
+        // Fetch all coupons from the database
+
+        // Return the coupons as the API response
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+module.exports = {
+    adminLogin,
+    adminLogout,
+    dashboardHome,
+    manageVendors,
+    manageBrands,
+    manageCategories,
+    manageCoupons,
+    manageUsers,
+    manageOrders
+};

@@ -2,6 +2,26 @@ const User = require('../models/User');
 const Vendor = require('../models/Vendor');
 const Admin = require('../models/Admin');
 
+const authenticateUser = async (req, res, next) => {
+    try {
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const user = await User.findById(req.session.userId);
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid session' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 const authenticateVendor = async (req, res, next) => {
     try {
         if (!req.session.vendorId) {
@@ -75,4 +95,10 @@ const authorizeAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { authenticateVendor, authenticateAdmin, authorizeVendor, authorizeAdmin };
+module.exports = {
+    authenticateUser,
+    authenticateVendor,
+    authenticateAdmin,
+    authorizeVendor,
+    authorizeAdmin
+};

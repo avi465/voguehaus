@@ -3,22 +3,28 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { authenticateAdmin, authorizeAdmin } = require('../middlewares/authMiddleware');
 
-// Protect the routes with authentication and authorization middleware
-// router.use(authenticateAdmin);
-
 // Admin dashboard home page
-router.get('/', adminController.dashboardHome);
+router.get('/', authenticateAdmin, adminController.dashboardHome);
 
-// Login admin
-router.post('/login', adminController.loginAdmin);
+// Admin login
+router.post('/login', adminController.adminLogin);
 
-// Manage users
-router.get('/users', authorizeAdmin, adminController.manageUsers);
+// Admin logout
+router.post('/logout', authenticateAdmin, adminController.adminLogout);
+
+// Manage vendors
+router.get('/vendors', authenticateAdmin, adminController.manageVendors);
+
+// Manage categories
+router.get('/categories', authenticateAdmin, adminController.manageCategories);
+
+// Manage brands
+router.get('/brands', authenticateAdmin, adminController.manageBrands);
+
+// Manage coupons
+router.get('/coupons', authenticateAdmin, adminController.manageCoupons);
 
 // Manage orders
-router.get('/orders', authorizeAdmin, adminController.manageOrders);
-
-// Other admin-specific routes
-// ...
+router.get('/orders', authenticateAdmin, adminController.manageOrders);
 
 module.exports = router;
