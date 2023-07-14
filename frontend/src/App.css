@@ -21,3 +21,10 @@ html {
         background: #a4a4a4;
     }
 }
+
+.polka-pattern {
+    background-color: #ffffff;
+    opacity: 1;
+    background-image: radial-gradient(#000000 0.55px, #ffffff 0.55px);
+    background-size: 11px 11px;
+}

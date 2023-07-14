@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Vendor = require('../models/Vendor');
+const Seller = require('../models/Seller');
 const Admin = require('../models/Admin');
 
 const authenticateUser = async (req, res, next) => {
@@ -22,19 +22,19 @@ const authenticateUser = async (req, res, next) => {
     }
 };
 
-const authenticateVendor = async (req, res, next) => {
+const authenticateSeller = async (req, res, next) => {
     try {
-        if (!req.session.vendorId) {
+        if (!req.session.sellerId) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const vendor = await Vendor.findById(req.session.vendorId);
+        const seller = await Seller.findById(req.session.sellerId);
 
-        if (!vendor) {
+        if (!seller) {
             return res.status(401).json({ error: 'Invalid session' });
         }
 
-        req.vendor = vendor;
+        req.seller = seller;
         next();
     } catch (error) {
         console.log(error);
@@ -62,17 +62,17 @@ const authenticateAdmin = async (req, res, next) => {
     }
 };
 
-const authorizeVendor = async (req, res, next) => {
+const authorizeSeller = async (req, res, next) => {
     try {
-        const { vendor, params } = req;
+        const { seller, params } = req;
         const product = await Product.findById(params.productId);
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Check if the logged-in vendor is the owner of the product
-        if (product.vendor.toString() !== vendor._id.toString()) {
+        // Check if the logged-in seller is the owner of the product
+        if (product.seller.toString() !== seller._id.toString()) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -97,8 +97,8 @@ const authorizeAdmin = (req, res, next) => {
 
 module.exports = {
     authenticateUser,
-    authenticateVendor,
+    authenticateSeller,
     authenticateAdmin,
-    authorizeVendor,
+    authorizeSeller,
     authorizeAdmin
 };

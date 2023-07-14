@@ -13,6 +13,9 @@ router.post('/login', authController.login);
 // User logout
 router.post('/logout', authenticateUser, authController.logout);
 
+// Check session
+router.get('/check-session', authenticateUser, authController.checkSession);
+
 // Reset password
 // router.post('/reset-password', authController.resetPassword);
 

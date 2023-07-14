@@ -1,12 +1,14 @@
 import React from 'react'
 import Header from '../components/Header'
-import Menu from '../components/Menu'
 import Footer from '../components/Footer'
+import { Outlet } from 'react-router-dom'
 
 const Home = () => {
     return (
         <>
-            <Menu />
+            <Header />
+            <Outlet />
+            <Footer />
         </>
     )
 }

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const { store } = require('../middlewares/sessionMiddleware');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
-const Vendor = require('../models/Vendor');
+const Seller = require('../models/Seller');
 const Order = require('../models/Order');
 // ...
 
@@ -66,6 +66,12 @@ const adminLogout = (req, res) => {
     }
 }
 
+// Check session
+const checkSession = async (req, res) => {
+    // Admin session is valid
+    res.sendStatus(200);
+}
+
 const dashboardHome = async (req, res) => {
     try {
         // Fetch all users from the database
@@ -108,13 +114,13 @@ const manageOrders = async (req, res) => {
     }
 }
 
-const manageVendors = async (req, res) => {
+const manageSellers = async (req, res) => {
     try {
-        // Fetch all vendors from the database
-        const vendors = await Vendor.find();
+        // Fetch all sellers from the database
+        const sellers = await Seller.find();
 
-        // Return the vendors as the API response
-        res.json({ vendors });
+        // Return the sellers as the API response
+        res.json({ sellers });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -162,8 +168,9 @@ const manageCoupons = async (req, res) => {
 module.exports = {
     adminLogin,
     adminLogout,
+    checkSession,
     dashboardHome,
-    manageVendors,
+    manageSellers,
     manageBrands,
     manageCategories,
     manageCoupons,

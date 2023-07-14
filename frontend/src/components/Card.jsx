@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 const Card = () => {
     return (
@@ -77,4 +77,18 @@ const Card = () => {
     )
 }
 
-export default Card
+
+const CardSmall = (props) => {
+    return (
+        <>
+            <div class="flex flex-col hover:shadow-sm overflow-hidden m-2 p-2">
+                <img class="w-fit object-cover" src={props.image} />
+                <span className='font-bold text-lg text-center leading-'>Winter Store</span>
+                <span className='text-center'>Min 10% off</span>
+            </div>
+        </>
+    )
+}
+
+export default Card;
+export { CardSmall };

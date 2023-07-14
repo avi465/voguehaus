@@ -15,9 +15,9 @@ const rewardCoinSchema = new mongoose.Schema({
                 type: Number,
                 required: true,
             },
-            vendor: {
+            seller: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Vendor',
+                ref: 'Seller',
                 required: true,
             },
             product: {

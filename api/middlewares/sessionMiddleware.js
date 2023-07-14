@@ -25,6 +25,10 @@ const sessionMiddleware = session({
     resave: false,
     saveUninitialized: false,
     store: store,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',  // Set to true if using HTTPS
+        maxAge: 24 * 60 * 60 * 1000 * 30, // Session expiration time in milliseconds
+    },
 });
 
 module.exports = { store, sessionMiddleware };

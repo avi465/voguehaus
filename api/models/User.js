@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         country: String,
     },
     phone: { type: String },
-    role: { type: String, enum: ['user', 'vendor', 'admin'], default: 'user' },
+    role: { type: String, enum: ['user', 'seller', 'admin'], default: 'user' },
     cart: [
         {
             product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },

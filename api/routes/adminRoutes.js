@@ -12,8 +12,11 @@ router.post('/login', adminController.adminLogin);
 // Admin logout
 router.post('/logout', authenticateAdmin, adminController.adminLogout);
 
-// Manage vendors
-router.get('/vendors', authenticateAdmin, adminController.manageVendors);
+// Check session
+router.get('/check-session', authenticateAdmin, adminController.checkSession);
+
+// Manage sellers
+router.get('/sellers', authenticateAdmin, adminController.manageSellers);
 
 // Manage categories
 router.get('/categories', authenticateAdmin, adminController.manageCategories);

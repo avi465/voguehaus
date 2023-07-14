@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const vendorSchema = new mongoose.Schema({
+const SellerSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
@@ -18,6 +18,6 @@ const vendorSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
 });
 
-const Vendor = mongoose.model('Vendor', vendorSchema);
+const Seller = mongoose.model('Seller', SellerSchema);
 
-module.exports = Vendor;
+module.exports = Seller;
