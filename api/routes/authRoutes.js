@@ -4,19 +4,25 @@ const authController = require('../controllers/authController');
 const { authenticateUser } = require('../middlewares/authMiddleware');
 
 
-// User registration
+// register user
 router.post('/register', authController.register);
 
-// User login
+// login user
 router.post('/login', authController.login);
 
-// User logout
+// logout user
 router.post('/logout', authenticateUser, authController.logout);
 
-// Check session
-router.get('/check-session', authenticateUser, authController.checkSession);
+// get otp
+router.post('/get-otp', authController.getOtp);
 
-// Reset password
+// verify otp
+router.post('/verify-otp', authController.verifyOtp);
+
+// verify session
+router.get('/verify-session', authenticateUser, authController.verifySession);
+
+// reset password
 // router.post('/reset-password', authController.resetPassword);
 
 module.exports = router;

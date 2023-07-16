@@ -1,9 +1,7 @@
 const bcrypt = require('bcrypt');
-const multer = require('multer');
 const Product = require('../models/Product');
 const Seller = require('../models/Seller');
-const upload = require('../middlewares/handleImageUpload');
-// ...
+
 const sellerRegister = async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
@@ -121,50 +119,6 @@ const sellerLogout = async (req, res) => {
     }
 };
 
-// Check session
-const checkSession = async (req, res) => {
-    res.sendStatus(200);
-}
-
-
-const dashboardHome = async (req, res) => {
-    try {
-        // Fetch the seller's products from the database
-        const products = await Product.find({ seller: req.seller._id });
-
-        // Return the products as the API response
-        res.json({ products });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-}
-
-const uploadImage = async (req, res, next) => {
-    try {
-        upload.single('image')(req, res, async function (err) {
-            if (err instanceof multer.MulterError) {
-                // Handle multer errors
-                return next(err);
-            } else if (err) {
-                // Handle other errors
-                return next(err);
-            }
-
-            // File uploaded successfully
-            const { filename } = req.file;
-
-            // Store the image path in the seller record
-            // req.seller.image = filename;
-            // await req.seller.save();
-
-            res.json({ message: 'Image uploaded successfully' });
-        });
-    } catch (error) {
-        next(error);
-    }
-}
-
 const addProduct = async (req, res) => {
     try {
         // Get the product details from the request body
@@ -251,13 +205,10 @@ const deleteProduct = async (req, res) => {
 }
 
 module.exports = {
-    dashboardHome,
-    uploadImage,
     addProduct,
     editProduct,
     deleteProduct,
     sellerLogin,
     sellerLogout,
-    checkSession,
     sellerRegister
 };

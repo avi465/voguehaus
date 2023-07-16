@@ -1,57 +1,36 @@
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
+const modelResolver = require('./query');
 
-const register = async (name, email, phone, password) => {
+exports.register = async (email, password, role = "user") => {
     try {
-        // Check if the email already exists
-        if (email) {
-            const isEmailExist = await User.findOne({ email });
-            if (isEmailExist) {
-                return res.status(400).json({ error: 'Email already exists' });
-            }
-
-            // Check if the password is provided
-            if (!password) {
-                return res.status(400).json({ error: 'Password is required' });
-            }
-
-            // Hash the password
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Create a new user
-            const newUser = new User({
-                name,
-                email,
-                password: hashedPassword,
-            });
-            await newUser.save();
+        if (!email) {
+            throw new Error('Email is required');
+        }
+        if (!password) {
+            throw new Error('Password is required');
+        }
+        if (!role) {
+            throw new Error('Role is required');
         }
 
-        res.json({ message: 'User registered successfully' });
+        const Model = modelResolver(role);
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // check if the email already exists
+        const isEmailAlreadyRegistered = await Model.findOne({ email });
+        if (isEmailAlreadyRegistered) {
+            throw new Error('Email already exists');
+        }
+
+        // create a new user
+        const newUser = await Model.create({
+            email,
+            password: hashedPassword,
+        });
+
+        return newUser;
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        throw error;
     }
 };
-
-
-
-const phoneAuth = (phone, otpCode) => {
-    // Read more at http://twil.io/secure
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const verifySid = process.env.TWILIO_VERIFY_SID;
-    const client = require("twilio")(accountSid, authToken);
-
-    client.verify.v2
-        .services(verifySid)
-        .verifications.create({ to: phone, channel: "sms" })
-        .then((verification) => console.log(verification.status))
-        .then(() => {
-            client.verify.v2
-                .services(verifySid)
-                .verificationChecks.create({ to: phone, code: otpCode })
-                .then((verification_check) => console.log(verification_check.status))
-        });
-}

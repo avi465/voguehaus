@@ -66,12 +66,6 @@ const adminLogout = (req, res) => {
     }
 }
 
-// Check session
-const checkSession = async (req, res) => {
-    // Admin session is valid
-    res.sendStatus(200);
-}
-
 const dashboardHome = async (req, res) => {
     try {
         // Fetch all users from the database
@@ -168,7 +162,6 @@ const manageCoupons = async (req, res) => {
 module.exports = {
     adminLogin,
     adminLogout,
-    checkSession,
     dashboardHome,
     manageSellers,
     manageBrands,

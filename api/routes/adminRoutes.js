@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const authController = require('../controllers/authController');
 const { authenticateAdmin, authorizeAdmin } = require('../middlewares/authMiddleware');
 
 // Admin dashboard home page
@@ -13,7 +14,7 @@ router.post('/login', adminController.adminLogin);
 router.post('/logout', authenticateAdmin, adminController.adminLogout);
 
 // Check session
-router.get('/check-session', authenticateAdmin, adminController.checkSession);
+router.get('/verify-session', authenticateAdmin, authController.verifySession);
 
 // Manage sellers
 router.get('/sellers', authenticateAdmin, adminController.manageSellers);

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sellerController = require('../controllers/sellerController');
+const authCotroller = require('../controllers/authController');
 const { authenticateSeller, authorizeSeller } = require('../middlewares/authMiddleware');
 
 // Protect the routes with authentication and authorization middleware
@@ -16,16 +17,10 @@ router.post('/login', sellerController.sellerLogin);
 router.post('/logout', authenticateSeller, sellerController.sellerLogout);
 
 // Check session
-router.get('/check-session', authenticateSeller, sellerController.checkSession);
-
-// Seller dashboard home page
-router.get('/', sellerController.dashboardHome);
+router.get('/verify-session', authenticateSeller, authCotroller.verifySession);
 
 // Add a new product
 router.post('/products', authorizeSeller, sellerController.addProduct);
-
-// Upload a product image
-router.post('/upload/image', authorizeSeller, sellerController.uploadImage);
 
 // Edit an existing product
 router.put('/products/:productId', authorizeSeller, sellerController.editProduct);
